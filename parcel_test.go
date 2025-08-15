@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -56,11 +56,11 @@ func TestAddGetDelete(t *testing.T) {
 	require.Equal(t, len(parcels), len(storedParcels), "Количество посылок не совпадает")
 
 	for _, p := range storedParcels {
-    	original, exists := parcelMap[p.Number]
-    	require.True(t, exists, "Посылка с номером %d не найдена в исходных данных", p.Number)
-		
-    	require.Equal(t, original, p, "Посылка с номером %d не соответствует ожидаемой", p.Number,
-    	    "При сравнении игнорируется поле Number, так как оно может различаться")
+		original, exists := parcelMap[p.Number]
+		require.True(t, exists, "Посылка с номером %d не найдена в исходных данных", p.Number)
+
+		require.Equal(t, original, p, "Посылка с номером %d не соответствует ожидаемой", p.Number,
+			"При сравнении игнорируется поле Number, так как оно может различаться")
 	}
 
 	for id := range parcelMap {
@@ -73,29 +73,29 @@ func TestAddGetDelete(t *testing.T) {
 }
 
 func TestSetAddress(t *testing.T) {
-    db, err := sql.Open("sqlite", "tracker.db")
-    require.NoError(t, err, "Не удалось подключиться к базе данных")
-    defer db.Close()
+	db, err := sql.Open("sqlite", "tracker.db")
+	require.NoError(t, err, "Не удалось подключиться к базе данных")
+	defer db.Close()
 
-    store := NewParcelStore(db)
+	store := NewParcelStore(db)
 
-    parcel := getTestParcel()
-    id, err := store.Add(parcel)
-    require.NoError(t, err)
-    require.NotZero(t, id)
+	parcel := getTestParcel()
+	id, err := store.Add(parcel)
+	require.NoError(t, err)
+	require.NotZero(t, id)
 
-    newAddress := "new test address"
-    err = store.SetAddress(id, newAddress)
-    require.NoError(t, err)
+	newAddress := "new test address"
+	err = store.SetAddress(id, newAddress)
+	require.NoError(t, err)
 
-    updatedParcel, err := store.Get(id)
-    require.NoError(t, err)
+	updatedParcel, err := store.Get(id)
+	require.NoError(t, err)
 
-    expectedParcel := parcel
-    expectedParcel.Number = id 
-    expectedParcel.Address = newAddress
+	expectedParcel := parcel
+	expectedParcel.Number = id
+	expectedParcel.Address = newAddress
 
-    require.Equal(t, expectedParcel, updatedParcel, "Посылка после обновления адреса не соответствует ожидаемой")
+	require.Equal(t, expectedParcel, updatedParcel, "Посылка после обновления адреса не соответствует ожидаемой")
 }
 
 func TestSetStatus(t *testing.T) {
@@ -122,7 +122,7 @@ func TestSetStatus(t *testing.T) {
 	updatedParcel, err := store.Get(id)
 	require.NoError(t, err)
 
-	expectedParcel := parcel          
+	expectedParcel := parcel
 	expectedParcel.Number = updatedParcel.Number
 	expectedParcel.Status = newStatus
 
@@ -149,12 +149,12 @@ func TestGetByClient(t *testing.T) {
 	parcels[2].Client = client
 
 	for i := 0; i < len(parcels); i++ {
-   		id, err := store.Add(parcels[i])
-   		require.NoError(t, err, "Не удалось добавить посылку")
-   		require.NotZero(t, id, "Ожидался ненулевой ID посылки")
+		id, err := store.Add(parcels[i])
+		require.NoError(t, err, "Не удалось добавить посылку")
+		require.NotZero(t, id, "Ожидался ненулевой ID посылки")
 
-   		parcels[i].Number = id
-   		parcelMap[id] = parcels[i]
+		parcels[i].Number = id
+		parcelMap[id] = parcels[i]
 	}
 
 	storedParcels, err := store.GetByClient(client)
@@ -162,12 +162,12 @@ func TestGetByClient(t *testing.T) {
 	require.Equal(t, len(parcels), len(storedParcels), "Количество полученных посылок не соответствует ожидаемому")
 
 	for _, parcel := range storedParcels {
-    	original, exists := parcelMap[parcel.Number]
-    	require.True(t, exists, "Посылка с номером %d не найдена в исходных данных", parcel.Number)
-		
-    	assert.Equal(t, original.Client, parcel.Client, "Несоответствие Client для посылки %d", parcel.Number)
-    	assert.Equal(t, original.Status, parcel.Status, "Несоответствие Status для посылки %d", parcel.Number)
-    	assert.Equal(t, original.Address, parcel.Address, "Несоответствие Address для посылки %d", parcel.Number)
-    	assert.Equal(t, original.CreatedAt, parcel.CreatedAt, "Несоответствие CreatedAt для посылки %d", parcel.Number)
+		original, exists := parcelMap[parcel.Number]
+		require.True(t, exists, "Посылка с номером %d не найдена в исходных данных", parcel.Number)
+
+		expected := original
+		expected.Number = parcel.Number
+
+		assert.Equal(t, expected, parcel, "Несоответствие данных для посылки %d", parcel.Number)
 	}
 }
